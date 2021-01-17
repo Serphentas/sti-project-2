@@ -125,7 +125,6 @@ Nous considérons des attaques à l'encontre de l'application sous différents a
 - Mapping the application
 - Attacking authentication
 - Attacking session management
-- Attacking access controls
 - Attacking data stores
 - Attacking users: Cross-site scripting
 - Attacking the application server
