@@ -43,6 +43,8 @@ def current_user():
 def add_headers(response):
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Content-Security-Policy"] = "frame-ancestors 'self';"
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["access-control-allow-origin"] = "https://code.jquery.com/"
     return response
 
 @APP.route('/')

@@ -66,15 +66,7 @@ que l'on mesurera en termes d'impact pour l'entité victime.
 
 Nous ciblons l'application sous différents angles d'attaque. Notamment:
 
-- Mapping the application
-- Bypassing client-side controls
-- Attacking authentication
 - Attacking session management
-- Attacking access controls
 - Attacking data stores
-- Attacking back-end components
-- Attacking application logic
 - Attacking users: Cross-site scripting
-- Attacking the application server
-- Finding vulnerabilites in source code
 

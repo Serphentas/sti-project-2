@@ -118,3 +118,32 @@ Une autre méthode (plus classique) consiste à utiliser des tokens CSRF dans le
 
 
 
+### Cross-Domain Source File Inclusion
+
+Cross-origin resource sharing (CORS) est un mécanisme permettant l'inclusion de contenu et/ou ressources provenant d'un autre domaine, cela permet d'avantage de flexibilité que la "same-origin policy" mais peut être la source d'attaques et de vulnérabilités. Typiquement une politique d'inclusion trop laxiste mise en place par un développeur paresseux pourra résulter en l'inclusion par un attaquant d'un script depuis un domaine dont il a le contrôle.
+
+##### Applications contre notre site
+
+Le cas "à risque" sur notre site est l'inclusion d'une librairie externe JavaScript (jQuery) qui témoigne d'une politique trop laxiste concernant les inclusions. 
+
+Nous n'allons pas aller dans les détails d'une attaque mais simplement détailler quelles bonnes pratiques permettent d'éviter tout risque concernant ces inclusions.
+
+##### Mitigation des attaques
+
+Nous pouvons utiliser les en-têtes `Access-Control-Allow-Origin` afin définir que jQuery est une source de confiance, ces en-têtes permettent de mitiger le risque en permetant de spécifier des hôtes de confiance (et ainsi de refuser les autres). 
+
+Une alternative serait d'utiliser jQuery en ayant téléchargé la ressource et en l'ajoutant au ressources statiques utilisées par le site.
+
+Dans les deux cas, nous recommandons l'utilisation additionnelle de la notion de SRI (subresource integrity), une validation de l'intégrité des ressources demandées qui est maintenant répandue au niveau HTML.
+
+Au niveau du code, nous avons simplement ajouté // TODO //
+
+
+
+### X-Content-Type-Options Header Missing
+
+Un autre avertissement au niveau des en-têtes signale l’absence de « X-Content-Type-Options » qui devrait être mis à « nosniff » afin d’éviter que le site soit accédé par d’anciennes versions de navigateur et que le contenu soit mal interprété à cause de « MIME-sniffing ». Il ne s'agit là pas d'une vulnérabilité importante en terme de sécurité mais d'une correction que nous incluons dans notre rapport puisqu'elle a été detectée durant notre phase de scanning de l'application.
+
+##### Correction
+
+Nous avons ajouté `response.headers["X-Content-Type-Options"] = "nosniff"` à la méthode de contrôle des en-têtes ajoutée précédemment.
