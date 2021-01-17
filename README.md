@@ -10,9 +10,13 @@
   - [Exposition](#Exposition)
   - [Menaces](#Menaces)
   - [Risques et dommages](#Risques-et-dommages)
-- [Buts visés]()
-- [Analyse de menaces]()
-  - [Topic 1]()
+- [Description du système]()
+  - [Objectifs]()
+  - [Exigeances]()
+  - [Composition]()
+- [Sources de menaces]()
+- [Scénarios d'attaque]()
+- [Correctifs proposés]()
 - [Conclusion]()
 
 ## 1 Introduction
@@ -62,18 +66,99 @@ avec un facteur contextuel:
 
 que l'on mesurera en termes d'impact pour l'entité victime.
 
-## Buts visés
+## 3 Description du système
 
-Nous ciblons l'application sous différents angles d'attaque. Notamment:
+### 3.1 Objectifs
+
+La messagerie doit offrir les fonctionnalités suivantes:
+- possibilité de créer un compte dans le service (contrôle d'accès),
+  - contrôle d'accès avec un système de login username/password,
+- possibilité de rédiger des messages avec champs: De, À, Message (messagerie),
+- possibilité de modifier ses propres données,
+- possibilité d'administrer les utilisateurs avec un compte admin (mot de passe, désactivation, rôle).
+
+### 3.2 Exigeances
+
+La messagerie doit illustrer les trois propriétés suivantes:
+- Disponibilité: être accessible un maximum de temps,
+- Fiabilité: ne pas perdre les données de ses utilisateurs,
+- Confidentialité: garantir que les messages échangés entre deux utilisateurs ne sont accessibles par personne d'autre que l'administrateur et eux-mêmes.
+
+### 3.3 Composition
+
+On dénombre deux entités majeurs dans le système:
+1. Comptes (normaux & admin),
+2. Le couple webapp-database.
+
+Leurs relations sont représentées comme suit:
+
+![DFD](img/dfd.jpg)
+
+## 4 Sources de menaces
+
+### 4.1 Sources d'attaques
+
+Nous pouvons supposer les différents acteurs malicieux suivants:
+- utilisateur malintentionné,
+- ennemi de l'entité où la messagerie est déployée (ex. concurrent),
+- hacker "random" cherchant un gain (a priori monétaire),
+
+### 4.2 Cibles potentielles
+
+Naturellement, il suit que les entités suivantes sont à risques:
+- n'importe quel utilisateur,
+- un administrateur,
+- les entités qui dépendent des propriétés sécuritaires fournies par l'application (ex. bouts de propriété intellectuelle dans un message -> entreprise).
+
+### 4.3 Motivations
+
+Selon les deux derniers chapitres, nous pouvons émettre les motivations suivantes:
+- déni de service,
+- accès à des informations privées,
+- accès aux messages internes/privés,
+- pivot pour une attaque de plus grande envergure.
+
+## 5 Scénarios d'attaque
+
+Nous considérons des attaques à l'encontre de l'application sous différents angles, notamment:
 
 - Mapping the application
-- Bypassing client-side controls
 - Attacking authentication
 - Attacking session management
 - Attacking access controls
 - Attacking data stores
-- Attacking back-end components
-- Attacking application logic
 - Attacking users: Cross-site scripting
 - Attacking the application server
-- Finding vulnerabilites in source code
+
+et suivant les vecteurs d'attaque que nous avons trouvés:
+
+- CSRF manquant dans tous les formulaires
+- pas d'usage de CORS
+- pas d'usage de X-Frame-Option
+
+nous proposons les scénarios d'attaque ci-dessous.
+
+### 5.1 Déni de service
+
+L'application ne fournit aucune fonctionnalité de type "throttling", "quota management", et "robot check". Par conséquent, il est possible que:
+- des créations de comptes en masse se fassent sans restriction,
+- des messages soient envoyés sans fin, dans la limite de la taille des messages (200 caractères),
+- des actions (ex. envoi de message, suppression de comptes) soient déclenchées par l'abus du manque de CSRF,
+- des requêtes vers la boîte mail soient faites en masse et, supposant une quantité de messages importante, que la bande passante soit fortement sollicitée.
+
+### 5.2 Fuite de PII
+
+Comme nous pouvons inclure le site en Iframe sans restriction, il serait possible
+
+### 5.3 Fuite de messages
+
+
+
+### 5.4 Pivot
+
+
+
+## 6 Correctifs proposés
+
+
+## 7 Conclusion
