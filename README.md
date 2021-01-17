@@ -77,3 +77,4 @@ Nous ciblons l'application sous différents angles d'attaque. Notamment:
 - Attacking users: Cross-site scripting
 - Attacking the application server
 - Finding vulnerabilites in source code
+
