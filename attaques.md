@@ -120,23 +120,27 @@ Une autre méthode (plus classique) consiste à utiliser des tokens CSRF dans le
 
 ### Cross-Domain Source File Inclusion
 
-Cross-origin resource sharing (CORS) est un mécanisme permettant l'inclusion de contenu et/ou ressources provenant d'un autre domaine, cela permet d'avantage de flexibilité que la "same-origin policy" mais peut être la source d'attaques et de vulnérabilités. Typiquement une politique d'inclusion trop laxiste mise en place par un développeur paresseux pourra résulter en l'inclusion par un attaquant d'un script depuis un domaine dont il a le contrôle.
+Cross-origin resource sharing (CORS) est un mécanisme permettant l'inclusion de contenu et/ou ressources provenant d'un autre domaine, cela permet d'avantage de flexibilité que la "same-origin policy" mais peut être la source d'attaques et de vulnérabilités. 
 
 ##### Applications contre notre site
 
-Le cas "à risque" sur notre site est l'inclusion d'une librairie externe JavaScript (jQuery) qui témoigne d'une politique trop laxiste concernant les inclusions. 
+Le cas "à risque" sur notre site est l'inclusion d'une librairie externe JavaScript (jQuery), nous faisons confiance dans notre cas au domaine _jquery.com_ et au fait que ce dernier ne sera pas compromis par un attaquant.
 
-Nous n'allons pas aller dans les détails d'une attaque mais simplement détailler quelles bonnes pratiques permettent d'éviter tout risque concernant ces inclusions.
+Nous n'allons pas aller dans les détails d'une attaque mais on peut notamment imaginer le cas où un attaquant effectue un MITM pour prétendre être le domaine ci-dessus, il pourra inclure un script malveillant chez la victime lorsque cette dernière fera la requête de ce dernier.
 
 ##### Mitigation des attaques
 
-Nous pouvons utiliser les en-têtes `Access-Control-Allow-Origin` afin définir que jQuery est une source de confiance, ces en-têtes permettent de mitiger le risque en permetant de spécifier des hôtes de confiance (et ainsi de refuser les autres). 
+Une alternative serait d'utiliser jQuery en ayant téléchargé la ressource et en l'ajoutant au ressources statiques utilisées par le site, cela possède l'avantage d'inclure uniquement des sources du même domaine et d'éviter ainsi le risque que l'un des domaines auquel nous faisons appel ait été compromis ou soit utilisé pour un MITM.
 
-Une alternative serait d'utiliser jQuery en ayant téléchargé la ressource et en l'ajoutant au ressources statiques utilisées par le site.
+Dans les deux cas, nous recommandons l'utilisation additionnelle de la notion de SRI (subresource integrity), une validation de l'intégrité des ressources demandées qui est maintenant répandue au niveau HTML. Cela permet de vérifier l'empreinte d'une ressource inclue et ainsi de s'assurer qu'elle n'a pas été alterée par un attaquant.
 
-Dans les deux cas, nous recommandons l'utilisation additionnelle de la notion de SRI (subresource integrity), une validation de l'intégrité des ressources demandées qui est maintenant répandue au niveau HTML.
+Au niveau du code, nous avons simplement remplacé notre inclusion par une vérifiant l'intégrité
 
-Au niveau du code, nous avons simplement ajouté // TODO //
+```html
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"
+		integrity="sha256-9/aliU8dGd2tb6OSsuzixeV4y/faTqgFtohetphbbj0="
+		crossorigin="anonymous"> </script>
+```
 
 
 
@@ -147,3 +151,54 @@ Un autre avertissement au niveau des en-têtes signale l’absence de « X-Conte
 ##### Correction
 
 Nous avons ajouté `response.headers["X-Content-Type-Options"] = "nosniff"` à la méthode de contrôle des en-têtes ajoutée précédemment.
+
+
+
+### Injections SQL
+
+Ce type d'attaque consiste à utiliser des inputs utilisateurs afin de modifier le comportement d'une requête vers la base de données, dans le but de récupérer par exemple d'avantage de champs, d'autres informations que celles auxquelles on a accès, etc ...
+
+##### Applications contre notre site
+
+Une injection SQL pourrait par exemple permettre à un attaquant de récupérer une liste des utilisateurs ou des messages confidentiels, risque important pour notre image si des données sensibles fuitent de cette manière.
+
+##### Vérification de l'attaque
+
+Il y a deux routes sur lesquelles des paramètres sont utilisés, il s'agit de `/user/username` et de `/message/message_id`.
+
+Nous avons vérifiés les payloads classiques sur ces deux dernières, utilisé `sqlmap` (bien que ce dernier ne semble pas apprécier les paramètres sous cette forme) mais n'avons pas trouvé d'injection possible. En vérifiant le code et les technologies utilisées (SQLAlchemy principalement), ces dernières semblent ne pas être vulnérables aux injections SQL.
+
+##### Mitigation des attaques
+
+Utilisation d'un framework ou de requête préparées, vérification des entrées utilisateurs, escape des charactères à risques.
+
+
+
+### Logique applicative
+
+Un attaquant exploite une faille dans la logique applicative afin de commettre un acte qui lui est normalement interdit.
+
+##### Applications contre notre site
+
+Dans le cas de notre application, on citera principalement des problèmes d'autorisations qui permettraient à un utilisateur de lire les messages d'autres utilisateurs, il s'agit ici du plus gros risques pour la messagerie et la confiance des utilisateurs.
+
+##### Vérification de l'attaque
+
+On essaie d'accéder à `/message/id_message` depuis un autre utilisateur.
+
+On constate que l'application n'autorise pas l'accès.
+
+![](img/applogic.png)
+
+##### Mitigation des attaques
+
+Vérifications sécuritaires durant les phases de développement. Il est important pour un développeur d'être créatif lorsqu'il imagine les possibles chemins d'accès pour un utilisateur et de vérifier ses vérifications d'accès en détails.
+
+Dans notre cas, la condition qui permet de protéger un utilisateur contre l'accès à ses messages par un attaquant qui en connaît l'ID est vérifiée.
+
+```python
+elif message.recipient_name != user.username:
+	flash("Can't view messages from other users", 'alert-danger')
+    return redirect('/inbox')
+```
+
