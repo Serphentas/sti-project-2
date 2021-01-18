@@ -202,3 +202,46 @@ elif message.recipient_name != user.username:
     return redirect('/inbox')
 ```
 
+
+
+### Sessions
+
+Un attaquant vise à récupérer la session d'un utilisateur ou à se forger une session utilisateur afin d'obtenir un accès au site qu'il ne devrait pas posséder.
+
+##### Applications contre notre site
+
+Si un attaquant peut se créer une session alors il peut lire les messages de l'utilisateur qu'il va incarné, il peut également promouvoir son compte administrateur s'il le désire.
+
+##### Vérification de l'attaque
+
+On va ici chercher à analyser l'implémentation faite du cookie de session, il utilise la technologie JWT afin de transmettre le nom de l'utilisateur à travers les pages. Tandis qu'une erreur d'implémentation peut rendre un token JWT mal sécurisé, une implémentation bien faite de la norme ne permet pas à un attaquant de modifier un cookie de session, ni d'en créer un. En effet le jeton inclus une signature créée à l'aide d'un secret connu de l'application uniquement, l'attaquant devrait récupérer ce secret s'il souhaite pouvoir créer un jeton. Bien entendu il est également nécessaire que les paramètres cryptographiques utilisés soient suffisamment forts.
+
+##### Mitigation des attaques
+
+Il faut être attentif aux erreurs d'implémentation et aux paramètres cryptographiques insufissants durant la phase de développement. Il est également nécessaire de faire attention aux potentielles attaques permettant de voler un cookie utilisateur, dans quel cas un jeton sécurisé ne sert à rien.
+
+
+
+
+
+### XSS
+
+Cette attaque permet à un attaquant de faire exécuter du code malveillant (javascript) à une victime, généralement en se servant d'entrées utilisateurs mal vérifiées.
+
+##### Applications contre notre site
+
+Un attaquant pourrait utiliser son pseudonyme ou le contenu d'un message pour faire executer une balise `<script>` chez un administrateur et récupérer ainsi un cookie de Session lui permettant d'avoir un accès administrateur. Il pourrait aussi simplement voler des sessions utilisateurs de la même manière.
+
+##### Vérification de l'attaque
+
+La manière la plus simple pour vérifier cette attaque est d'envoyer des messages dans le but d'essayer de provoquer une alterte en JavaScript, indiquant que ce dernier est executé. Nous sommes partis de payloads simples tel que `<script> alert(1); </script>` et avons évolué vers des versions plus offusquées comme `¼script¾alert(¢XSS¢)¼/script¾` ou `&lt;META HTTP-EQUIV=\"refresh\" CONTENT=\"0;url=javascript&#058;alert('XSS');\"&gt;` en passant par des alternatives comme l'utilisation d'une ressource `<img src=1 href=1 onerror="javascript:alert(1)"></img>` mais aucun de ces payloads nous donna de résultats.
+
+![](img/xssfailed.png)
+
+La raison pour laquelle l'attaque échoue est que le moteur de template pour l'affichage des pages web contient un système d'escaping de charactères, rendant une XSS classique impossible car le contenu des entrées utilisateurs ne sera jamais executé.
+
+##### Mitigation des attaques
+
+Vérification des entrées utilisateurs et/ou modification de ces dernières à l'affichage afin de ne pas inclure d'éléments de scripts ou d'HTML pouvant modifier le comportement désiré de la page.
+
+Dans notre cas, c'est _Jinja_ qui a été utilisé durant le développement et permet l'auto-escaping, prevenant ainsi les risques de XSS ([Documentation](https://jinja.palletsprojects.com/en/master/api/#autoescaping)).
