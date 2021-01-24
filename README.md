@@ -26,8 +26,8 @@
   - [5.5 Surveillance secrète (sniffing)](#5.5-Surveillance-secrète-(sniffing))
   - [5.6 Exécution de code côté client (XSS)](#5.6-Exécution-de-code-côté-client-(XSS))
   - [5.7 Usurpation d'identité et identité factice](#5.7-Usurpation-d'identité-et-identité-factice)
-- [6 Correctifs proposés]()
-- [7 Conclusion]()
+- [6 Correctifs proposés](#6-Correctifs-proposés)
+- [7 Conclusion](#7-Conclusion)
 
 ## 1 Introduction
 
