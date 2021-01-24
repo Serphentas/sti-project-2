@@ -406,6 +406,6 @@ Les correctifs proposés sont déjà détaillés dans le chapitre précédent. T
 
 ## 7 Conclusion
 
-En somme, l'application est bien écrite dans son application métier mais manque de précisions sécuritaires quand on regarde de plus près. Les détails comme CORS, CSRF, et Iframe sont souvent utilisés comme leviers subtiles pour mener à bien une attaque sophistiquée qui pousse les failles jusqu'aux limites du tolérable.
+En somme, l'application est bien écrite dans son application métier mais manque de précisions sécuritaires quand on regarde de plus près. Les détails comme CORS, CSRF, et Iframe sont souvent utilisés comme leviers subtiles pour mener à bien une attaque sophistiquée qui pousse les failles jusqu'aux limites du tolérable. Ces failles sont notamment dangereuse de par la facilité de leur détection et leur exploitation.
 
 L'adoption de BCP de la part du développeur permettrait de palier à ces problèmes, et ce également pour des futures applications écrites selon le même schéma.
